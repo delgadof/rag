@@ -87,6 +87,8 @@ services:
       SUMMARY_CHUNK_OVERLAP: ${SUMMARY_CHUNK_OVERLAP:-200}
       # Bearer token for summarizer NIM authentication
       SUMMARIZER_BEARER_TOKEN: ${SUMMARIZER_BEARER_TOKEN:-""}
+      # Bearer token for general LLM NIM authentication
+      BEARER_TOKEN: ${BEARER_TOKEN:-""}
       # Log level for server, supported level NOTSET, DEBUG, INFO, WARN, ERROR, CRITICAL
       LOGLEVEL: ${LOGLEVEL:-INFO}
 
