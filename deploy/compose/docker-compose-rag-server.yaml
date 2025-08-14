@@ -126,6 +126,14 @@ services:
       # reflection llm server url. If "", Nvidia hosted API is used
       REFLECTION_LLM_SERVERURL: ${REFLECTION_LLM_SERVERURL-"nim-llm-mixtral-8x22b:8000"}
 
+      BEARER_TOKEN: ${BEARER_TOKEN:-"your-llm-nim-bearer-token"}
+      EMBEDDING_BEARER_TOKEN: ${EMBEDDING_BEARER_TOKEN:-"your-embedding-nim-token"}
+      RANKING_BEARER_TOKEN: ${RANKING_BEARER_TOKEN:-"your-ranking-nim-token"}
+
+      # Additional endpoints
+      QUERY_REWRITER_BEARER_TOKEN: ${QUERY_REWRITER_BEARER_TOKEN:-"your-qr-token"}
+      SUMMARIZER_BEARER_TOKEN: ${SUMMARIZER_BEARER_TOKEN:-"your-summarizer-token"}
+
     ports:
       - "8081:8081"
     expose:
@@ -151,6 +159,12 @@ services:
         NEXT_PUBLIC_CHAT_BASE_URL: "http://rag-server:8081/v1"
         # URL for ingestor container
         NEXT_PUBLIC_VDB_BASE_URL: "http://ingestor-server:8082/v1"
+        # Bearer token for LLM
+        BEARER_TOKEN: ${BEARER_TOKEN:-"your-llm-nim-bearer-token"}
+        # Bearer token for embeddings
+        EMBEDDING_BEARER_TOKEN: ${EMBEDDING_BEARER_TOKEN:-"your-embedding-nim-token"}
+        # Bearer token for reranking
+        RANKING_BEARER_TOKEN: ${RANKING_BEARER_TOKEN:-"your-ranking-nim-token"}
     ports:
       - "8090:3000"
     expose:
