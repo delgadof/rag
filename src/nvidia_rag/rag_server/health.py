@@ -224,9 +224,16 @@ async def check_all_services_health() -> Dict[str, List[Dict[str, Any]]]:
             llm_url = f"http://{llm_url}/v1/health/ready"
         else:
             llm_url = f"{llm_url}/v1/health/ready"
+        
+        # Add bearer token authentication if available
+        llm_headers = {}
+        if config.llm.bearer_token:
+            llm_headers["Authorization"] = f"Bearer {config.llm.bearer_token}"
+        
         tasks.append(("nim", check_service_health(
             url=llm_url,
-            service_name=f"LLM ({config.llm.model_name})"
+            service_name=f"LLM ({config.llm.model_name})",
+            headers=llm_headers
         )))
     else:
         # When URL is empty or from API catalog, assume the service is running via API catalog
@@ -248,9 +255,16 @@ async def check_all_services_health() -> Dict[str, List[Dict[str, Any]]]:
                 qr_url = f"http://{qr_url}/v1/health/ready"
             else:
                 qr_url = f"{qr_url}/v1/health/ready"
+            
+            # Add bearer token authentication if available
+            qr_headers = {}
+            if config.query_rewriter.bearer_token:
+                qr_headers["Authorization"] = f"Bearer {config.query_rewriter.bearer_token}"
+            
             tasks.append(("nim", check_service_health(
                 url=qr_url,
-                service_name=f"Query Rewriter ({config.query_rewriter.model_name})"
+                service_name=f"Query Rewriter ({config.query_rewriter.model_name})",
+                headers=qr_headers
             )))
         else:
             # When URL is empty or from API catalog, assume the service is running via API catalog
@@ -269,9 +283,16 @@ async def check_all_services_health() -> Dict[str, List[Dict[str, Any]]]:
             embed_url = f"http://{embed_url}/v1/health/ready"
         else:
             embed_url = f"{embed_url}/v1/health/ready"
+        
+        # Add bearer token authentication if available
+        embed_headers = {}
+        if config.embeddings.bearer_token:
+            embed_headers["Authorization"] = f"Bearer {config.embeddings.bearer_token}"
+        
         tasks.append(("nim", check_service_health(
             url=embed_url,
-            service_name=f"Embeddings ({config.embeddings.model_name})"
+            service_name=f"Embeddings ({config.embeddings.model_name})",
+            headers=embed_headers
         )))
     else:
         # When URL is empty or from API catalog, assume the service is running via API catalog
@@ -292,9 +313,16 @@ async def check_all_services_health() -> Dict[str, List[Dict[str, Any]]]:
                 ranking_url = f"http://{ranking_url}/v1/health/ready"
             else:
                 ranking_url = f"{ranking_url}/v1/health/ready"
+            
+            # Add bearer token authentication if available
+            ranking_headers = {}
+            if config.ranking.bearer_token:
+                ranking_headers["Authorization"] = f"Bearer {config.ranking.bearer_token}"
+            
             tasks.append(("nim", check_service_health(
                 url=ranking_url,
-                service_name=f"Ranking ({config.ranking.model_name})"
+                service_name=f"Ranking ({config.ranking.model_name})",
+                headers=ranking_headers
             )))
         else:
             # When URL is empty or from API catalog, assume the service is running via API catalog
@@ -337,9 +365,16 @@ async def check_all_services_health() -> Dict[str, List[Dict[str, Any]]]:
                 reflection_url = f"http://{reflection_url}/v1/health/ready"
             else:
                 reflection_url = f"{reflection_url}/v1/health/ready"
+            
+            # Add bearer token authentication if available (uses general LLM bearer token)
+            reflection_headers = {}
+            if config.llm.bearer_token:
+                reflection_headers["Authorization"] = f"Bearer {config.llm.bearer_token}"
+            
             tasks.append(("nim", check_service_health(
                 url=reflection_url,
-                service_name=f"Reflection LLM ({reflection_llm})"
+                service_name=f"Reflection LLM ({reflection_llm})",
+                headers=reflection_headers
             )))
         else:
             # When URL is empty, assume the service is running via API catalog
