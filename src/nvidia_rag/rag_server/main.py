@@ -62,9 +62,9 @@ default_max_tokens = model_params["max_tokens"]
 default_temperature = model_params["temperature"]
 default_top_p = model_params["top_p"]
 
-document_embedder = get_embedding_model(model=CONFIG.embeddings.model_name, url=CONFIG.embeddings.server_url)
-ranker = get_ranking_model(model=CONFIG.ranking.model_name, url=CONFIG.ranking.server_url, top_n=CONFIG.retriever.top_k)
-query_rewriter_llm_config = {"temperature": 0.7, "top_p": 0.2, "max_tokens": 1024}
+document_embedder = get_embedding_model(model=CONFIG.embeddings.model_name, url=CONFIG.embeddings.server_url, bearer_token=CONFIG.embeddings.bearer_token)
+ranker = get_ranking_model(model=CONFIG.ranking.model_name, url=CONFIG.ranking.server_url, top_n=CONFIG.retriever.top_k, bearer_token=CONFIG.ranking.bearer_token)
+query_rewriter_llm_config = {"temperature": 0.7, "top_p": 0.2, "max_tokens": 1024, "bearer_token": CONFIG.query_rewriter.bearer_token}
 logger.info("Query rewriter llm config: model name %s, url %s, config %s", CONFIG.query_rewriter.model_name, CONFIG.query_rewriter.server_url, query_rewriter_llm_config)
 query_rewriter_llm = get_llm(model=CONFIG.query_rewriter.model_name, llm_endpoint=CONFIG.query_rewriter.server_url, **query_rewriter_llm_config)
 prompts = get_prompts()

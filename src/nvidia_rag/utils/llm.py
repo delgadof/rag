@@ -80,7 +80,13 @@ def get_prompts() -> Dict:
 @utils_cache
 @lru_cache()
 def get_llm(**kwargs) -> LLM | SimpleChatModel:
-    """Create the LLM connection."""
+    """Create the LLM connection.
+    
+    Supports bearer token authentication for custom endpoints.
+    Bearer token can be provided via:
+    - BEARER_TOKEN environment variable (configured in settings.llm.bearer_token)
+    - 'bearer_token' keyword argument
+    """
 
     settings = get_config()
 
@@ -128,17 +134,40 @@ def get_llm(**kwargs) -> LLM | SimpleChatModel:
         if url:
             logger.debug(f"Length of llm endpoint url string {url}")
             logger.info("Using llm model %s hosted at %s", kwargs.get('model'), url)
-            return ChatNVIDIA(base_url=url,
-                              model=kwargs.get('model'),
-                              temperature=kwargs.get('temperature', None),
-                              top_p=kwargs.get('top_p', None),
-                              max_tokens=kwargs.get('max_tokens', None))
+            
+            # Check if bearer token is configured
+            bearer_token = settings.llm.bearer_token or kwargs.get('bearer_token', '')
+            chat_nvidia_kwargs = {
+                'base_url': url,
+                'model': kwargs.get('model'),
+                'temperature': kwargs.get('temperature', None),
+                'top_p': kwargs.get('top_p', None),
+                'max_tokens': kwargs.get('max_tokens', None)
+            }
+            
+            if bearer_token:
+                logger.info("Using bearer token authentication for custom endpoint")
+                # Use bearer token authentication
+                chat_nvidia_kwargs['api_key'] = bearer_token
+            
+            return ChatNVIDIA(**chat_nvidia_kwargs)
 
         logger.info("Using llm model %s from api catalog", kwargs.get('model'))
-        return ChatNVIDIA(model=kwargs.get('model'),
-                          temperature=kwargs.get('temperature', None),
-                          top_p=kwargs.get('top_p', None),
-                          max_tokens=kwargs.get('max_tokens', None))
+        
+        # Check if bearer token is configured for API catalog
+        bearer_token = settings.llm.bearer_token or kwargs.get('bearer_token', '')
+        chat_nvidia_kwargs = {
+            'model': kwargs.get('model'),
+            'temperature': kwargs.get('temperature', None),
+            'top_p': kwargs.get('top_p', None),
+            'max_tokens': kwargs.get('max_tokens', None)
+        }
+        
+        if bearer_token:
+            logger.info("Using bearer token authentication for API catalog")
+            chat_nvidia_kwargs['api_key'] = bearer_token
+        
+        return ChatNVIDIA(**chat_nvidia_kwargs)
 
     raise RuntimeError(
         "Unable to find any supported Large Language Model server. Supported engine name is nvidia-ai-endpoints.")

@@ -28,8 +28,13 @@ from nvidia_rag.utils.common import get_config, sanitize_nim_url
 logger = logging.getLogger(__name__)
 
 @lru_cache
-def _get_ranking_model(model="", url="", top_n=4) -> BaseDocumentCompressor:
+def _get_ranking_model(model="", url="", top_n=4, **kwargs) -> BaseDocumentCompressor:
     """Create the ranking model.
+    
+    Supports bearer token authentication for custom endpoints.
+    Bearer token can be provided via:
+    - RANKING_BEARER_TOKEN environment variable (configured in settings.ranking.bearer_token)
+    - 'bearer_token' keyword argument
 
     Returns:
         BaseDocumentCompressor: Base class for document compressors.
@@ -42,15 +47,36 @@ def _get_ranking_model(model="", url="", top_n=4) -> BaseDocumentCompressor:
 
     try:
         if settings.ranking.model_engine == "nvidia-ai-endpoints":
+            # Check if bearer token is configured
+            bearer_token = settings.ranking.bearer_token or kwargs.get('bearer_token', '')
+            
             if url:
                 logger.info("Using ranking model hosted at %s", url)
-                return NVIDIARerank(base_url=url,
-                                    top_n=top_n,
-                                    truncate="END")
+                nvidia_rerank_kwargs = {
+                    'base_url': url,
+                    'top_n': top_n,
+                    'truncate': "END"
+                }
+                
+                if bearer_token:
+                    logger.info("Using bearer token authentication for ranking endpoint")
+                    nvidia_rerank_kwargs['api_key'] = bearer_token
+                
+                return NVIDIARerank(**nvidia_rerank_kwargs)
 
             if model:
                 logger.info("Using ranking model %s hosted at api catalog", model)
-                return NVIDIARerank(model=model, top_n=top_n, truncate="END")
+                nvidia_rerank_kwargs = {
+                    'model': model,
+                    'top_n': top_n,
+                    'truncate': "END"
+                }
+                
+                if bearer_token:
+                    logger.info("Using bearer token authentication for ranking API catalog")
+                    nvidia_rerank_kwargs['api_key'] = bearer_token
+                
+                return NVIDIARerank(**nvidia_rerank_kwargs)
         else:
             logger.warning("Unable to find any supported ranking model. Supported engine is nvidia-ai-endpoints.")
     except Exception as e:
@@ -58,11 +84,11 @@ def _get_ranking_model(model="", url="", top_n=4) -> BaseDocumentCompressor:
     return None
 
 
-def get_ranking_model(model="", url="", top_n=4) -> BaseDocumentCompressor:
+def get_ranking_model(model="", url="", top_n=4, **kwargs) -> BaseDocumentCompressor:
     """Create the ranking model."""
-    ranker = _get_ranking_model(model, url, top_n)
+    ranker = _get_ranking_model(model, url, top_n, **kwargs)
     if ranker is None:
         logger.warning("Cached ranking model was None — clearing cache and retrying.")
         _get_ranking_model.cache_clear()
-        ranker = _get_ranking_model(model, url, top_n)
+        ranker = _get_ranking_model(model, url, top_n, **kwargs)
     return ranker

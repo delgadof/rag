@@ -82,7 +82,7 @@ from nvidia_rag.utils.vectorstore import (
 logger = logging.getLogger(__name__)
 
 CONFIG = get_config()
-DOCUMENT_EMBEDDER = document_embedder = get_embedding_model(model=CONFIG.embeddings.model_name, url=CONFIG.embeddings.server_url)
+DOCUMENT_EMBEDDER = document_embedder = get_embedding_model(model=CONFIG.embeddings.model_name, url=CONFIG.embeddings.server_url, bearer_token=CONFIG.embeddings.bearer_token)
 NV_INGEST_CLIENT_INSTANCE = get_nv_ingest_client()
 MINIO_OPERATOR = get_minio_operator()
 
@@ -1197,7 +1197,8 @@ class NvidiaRAGIngestor():
             "model": summary_llm_name,
             "temperature": 0.4,
             "top_p": 0.9,
-            "max_tokens": 2048
+            "max_tokens": 2048,
+            "bearer_token": CONFIG.summarizer.bearer_token
         }
 
         if summary_llm_endpoint:

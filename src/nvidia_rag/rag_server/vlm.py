@@ -109,11 +109,23 @@ class VLM:
             logger.warning("No images provided for VLM analysis.")
             return ""
 
-        vlm = ChatOpenAI(
-            model=self.model_name,
-            openai_api_key=os.getenv("NVIDIA_API_KEY"),
-            openai_api_base=self.invoke_url,
-        )
+        # Get VLM configuration and check for bearer token
+        settings = get_config()
+        bearer_token = settings.vlm.bearer_token
+        
+        vlm_kwargs = {
+            'model': self.model_name,
+            'openai_api_base': self.invoke_url,
+        }
+        
+        # Use bearer token if configured, otherwise fall back to NVIDIA_API_KEY
+        if bearer_token:
+            logger.info("Using bearer token authentication for VLM endpoint")
+            vlm_kwargs['openai_api_key'] = bearer_token
+        else:
+            vlm_kwargs['openai_api_key'] = os.getenv("NVIDIA_API_KEY")
+        
+        vlm = ChatOpenAI(**vlm_kwargs)
         formatted_prompt = self.vlm_template.format(question=question)
         message = HumanMessage(content=[{"type": "text", "text": formatted_prompt}])
 

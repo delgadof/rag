@@ -33,8 +33,14 @@ except Exception:
     logger.warning("Optional module torch not installed.")
 
 @lru_cache
-def get_embedding_model(model: str, url: str) -> Embeddings:
-    """Create the embedding model."""
+def get_embedding_model(model: str, url: str, **kwargs) -> Embeddings:
+    """Create the embedding model.
+    
+    Supports bearer token authentication for custom endpoints.
+    Bearer token can be provided via:
+    - EMBEDDING_BEARER_TOKEN environment variable (configured in settings.embeddings.bearer_token)
+    - 'bearer_token' keyword argument
+    """
     model_kwargs = {"device": "cpu"}
     if torch.cuda.is_available():
         model_kwargs["device"] = "cuda:0"
@@ -58,16 +64,34 @@ def get_embedding_model(model: str, url: str) -> Embeddings:
         return hf_embeddings
 
     if settings.embeddings.model_engine == "nvidia-ai-endpoints":
+        # Check if bearer token is configured
+        bearer_token = settings.embeddings.bearer_token or kwargs.get('bearer_token', '')
+        
         if url:
-            logger.info("Using embedding model %s hosted at %s",
-                        model,
-                        url)
-            return NVIDIAEmbeddings(base_url=url,
-                                    model=model,
-                                    truncate="END")
+            logger.info("Using embedding model %s hosted at %s", model, url)
+            nvidia_embeddings_kwargs = {
+                'base_url': url,
+                'model': model,
+                'truncate': "END"
+            }
+            
+            if bearer_token:
+                logger.info("Using bearer token authentication for embedding endpoint")
+                nvidia_embeddings_kwargs['api_key'] = bearer_token
+            
+            return NVIDIAEmbeddings(**nvidia_embeddings_kwargs)
 
         logger.info("Using embedding model %s hosted at api catalog", model)
-        return NVIDIAEmbeddings(model=model, truncate="END")
+        nvidia_embeddings_kwargs = {
+            'model': model,
+            'truncate': "END"
+        }
+        
+        if bearer_token:
+            logger.info("Using bearer token authentication for embedding API catalog")
+            nvidia_embeddings_kwargs['api_key'] = bearer_token
+        
+        return NVIDIAEmbeddings(**nvidia_embeddings_kwargs)
 
     raise RuntimeError(
         "Unable to find any supported embedding model. Supported engine is huggingface and nvidia-ai-endpoints.")

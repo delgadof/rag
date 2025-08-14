@@ -241,6 +241,12 @@ class LLMConfig(ConfigWizard):
         default="ai-mixtral-8x7b-instruct",
         help_txt="The name of the ai catalog model to be used with PandasAI agent",
     )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for API authentication when using custom endpoints",
+    )
     # Add model parameters configuration
     parameters: ModelParametersConfig = configfield(
         "parameters",
@@ -295,6 +301,12 @@ class QueryRewriterConfig(ConfigWizard):
         "server_url",
         default="",
         help_txt="The location of the query rewriter model.",
+    )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="QUERY_REWRITER_BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for query rewriter API authentication when using custom endpoints",
     )
     enable_query_rewriter: bool = configfield(
         "enable_query_rewriter",
@@ -357,6 +369,12 @@ class EmbeddingConfig(ConfigWizard):
         default="",
         help_txt="The url of the server hosting nemo embedding model",
     )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="EMBEDDING_BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for embedding API authentication when using custom endpoints",
+    )
 
 
 @configclass
@@ -380,6 +398,12 @@ class RankingConfig(ConfigWizard):
         "server_url",
         default="",
         help_txt="The url of the server hosting nemo Ranking model",
+    )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="RANKING_BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for ranking API authentication when using custom endpoints",
     )
     enable_reranker: bool = configfield(
         "enable_reranker",
@@ -458,6 +482,12 @@ class VLMConfig(ConfigWizard):
         default="nvidia/llama-3.1-nemotron-nano-vl-8b-v1",
         help_txt="The name of the VLM model",
     )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="VLM_BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for VLM API authentication when using custom endpoints",
+    )
 
 @configclass
 class MinioConfig(ConfigWizard):
@@ -510,6 +540,12 @@ class SummarizerConfig(ConfigWizard):
         env_name="SUMMARY_CHUNK_OVERLAP",
         default=200,
         help_txt="Overlap between chunks for iterative summarization (in characters)",
+    )
+    bearer_token: str = configfield(
+        "bearer_token",
+        env_name="SUMMARIZER_BEARER_TOKEN",
+        default="",
+        help_txt="Bearer token for summarizer API authentication when using custom endpoints",
     )
 
 @configclass
